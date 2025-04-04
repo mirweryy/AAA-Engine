@@ -14,6 +14,12 @@ Vector3::Vector3(Vector3& other)
 	this->y = other.y;
 	this->z = other.z;
 }
+Vector3::Vector3(const Vector3& other)
+{
+	this->x = other.x;
+	this->y = other.y;
+	this->z = other.z;
+}
 Vector3::Vector3(Vector3&& other) noexcept
 {
 	this->x = other.x;
@@ -34,26 +40,31 @@ Vector3& Vector3::operator=(const Vector3& other)
 	return *this;
 }
 
-Vector3& Vector3::operator+(const Vector3& other)
+Vector3 Vector3::operator+(const Vector3& other)
 {
-	Vector3* new_vector = new Vector3(this->x + other.x, this->y + other.y, this->z + other.z);
-	return *new_vector;
+	return Vector3(this->x + other.x, this->y + other.y, this->z + other.z);
 }
-Vector3& Vector3::operator-(const Vector3& other)
+Vector3 Vector3::operator-(const Vector3& other)
 {
-	Vector3* new_vector = new Vector3(this->x - other.x, this->y - other.y, this->z - other.z);
-	return *new_vector;
+	return Vector3(this->x - other.x, this->y - other.y, this->z - other.z);
+}
+Vector3 Vector3::operator*(const Vector3& other)
+{
+	return Vector3(this->x * other.x, this->y * other.y, this->z * other.z);
+}
+Vector3 Vector3::operator/(const Vector3& other)
+{
+	return Vector3(this->x / other.x, this->y / other.y, this->z / other.z);
 }
 
-Vector3& Vector3::operator*(double value)
+
+Vector3 Vector3::operator*(double value)
 {
-	Vector3* new_vector = new Vector3(this->x * value, this->y * value, this->z * value);
-	return *new_vector;
+	return Vector3(this->x * value, this->y * value, this->z * value);
 }
-Vector3& Vector3::operator/(double value)
+Vector3 Vector3::operator/(double value)
 {
-	Vector3* new_vector = new Vector3(this->x / value, this->y / value, this->z / value);
-	return *new_vector;
+	return Vector3(this->x / value, this->y / value, this->z / value);
 }
 
 bool Vector3::operator==(const Vector3& other)
