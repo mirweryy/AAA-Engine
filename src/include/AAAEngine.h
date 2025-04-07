@@ -10,6 +10,9 @@
     #define EXPORT
 #endif
 
+#include <DataTypes.h>
+#include <Transform.h>
+
 #define REGISTER_SCRIPT(CLASSNAME)                   \
 extern "C" EXPORT Script* CreateScript() {           \
     return new CLASSNAME();                          \

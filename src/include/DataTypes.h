@@ -1,7 +1,8 @@
 #pragma once
 
+#include <CoreExport.h>
 
-class Vector3
+class CORE_API Vector3
 {
 public:
 	double x;
