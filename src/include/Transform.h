@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../DataTypes/DataTypes.h"
+#include <CoreExport.h>
+#include <DataTypes.h>
 
-class Transform
+class CORE_API Transform
 {
 public:
     Transform();

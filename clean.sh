@@ -1,0 +1,5 @@
+PROJECT_DIR=$(pwd)
+
+BUILD_DIR="$PROJECT_DIR/build"
+
+rm -rf "$BUILD_DIR"
