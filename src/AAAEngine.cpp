@@ -3,13 +3,15 @@
 #include <filesystem>
 #include <map>
 #include <vector>
+#include <string>
+#include <cstring>
 
 namespace fs = std::filesystem;
 
 #if defined(_WIN32) || defined(__MINGW32__)
     #include <windows.h>
     using LibHandle = HMODULE;
-    #define LoadLib(name) LoadLibrary(name)
+    #define LoadLib(name) LoadLibraryW(name)
     #define GetFunc GetProcAddress
     #define CloseLib FreeLibrary
 #else
@@ -21,6 +23,13 @@ namespace fs = std::filesystem;
 #endif
 
 
+char* WstringToUtf8(const std::wstring& wstr) {
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+    std::string utf8 = conv.to_bytes(wstr);
+    return strdup(utf8.c_str());  // вызывающая сторона должна освободить память через free()
+}
+
+
 // Часть ScriptModule
 using CreateScriptFunc = Script* (*)();
 
@@ -30,9 +39,13 @@ private:
     LibHandle handle = nullptr;
     Script* script = nullptr;
 public:
-    bool Load(const char* libPath)
+    bool Load(const std::wstring libPath)
     {
-        handle = LoadLib(libPath);
+        #if defined(_WIN32) || defined(__MINGW32__)
+            handle = LoadLib(libPath.c_str());
+        #else
+            handle = LoadLib(WstringToUtf8(libPath));
+        #endif
         if (!handle) return false;
 
         auto createFunc = (CreateScriptFunc)GetFunc(handle, "CreateScript");
@@ -64,7 +77,7 @@ public:
     }
 };
 
-std::map<std::string, std::string> availableScripts;
+std::map<std::wstring, std::wstring> availableScripts;
 
 // 1. Ищем папки с именем "build_scripts"
 std::vector<fs::path> FindScriptsFolders(const fs::path& root) {
@@ -110,9 +123,9 @@ void ScanScriptsInFolder(const fs::path& folder) {
             if (path.extension() == ".so")
 #endif
             {
-                std::string name = path.stem().string(); // имя файла без расширения
-                availableScripts[name] = path.string();
-                std::cout << "Found script: " << name << " -> " << path.string() << "\n";
+                std::wstring name = path.stem().wstring(); // имя файла без расширения
+                availableScripts[name] = path.wstring();
+                std::wcout << "Found script: " << name << " -> " << path.wstring() << "\n";
             }
         }
     }
@@ -126,14 +139,14 @@ int main() {
     std::cout << "Start!\n";
     fs::path rootPath = fs::current_path();
     if (rootPath.empty()) {
-        std::cerr << "Ошибка: путь root пуст.\n";
+        std::cerr << "Error: root is empty.\n";
         return 1;
     }
     std::vector<fs::path> scriptFolders = FindScriptsFolders(rootPath);
     for (const auto& folder : scriptFolders) {
         ScanScriptsInFolder(folder);
     }
-    auto it = availableScripts.find("Main");
+    auto it = availableScripts.find(L"Main");
     if (it != availableScripts.end()) {
         ScriptModule mod;
         if (mod.Load(it->second.c_str())) {
